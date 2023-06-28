@@ -1,1 +1,133 @@
-[]
+[
+    {
+        "id": "34f08c8e68659d11",
+        "type": "tab",
+        "label": "Summarize for a 2nd grader",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "9c0ab0c2d34d2ba0",
+        "type": "http in",
+        "z": "34f08c8e68659d11",
+        "name": "",
+        "url": "/createSummarize",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "b6ea179030253e67"
+            ]
+        ]
+    },
+    {
+        "id": "b6ea179030253e67",
+        "type": "function",
+        "z": "34f08c8e68659d11",
+        "name": "OpenAI API properties",
+        "func": "\n//const api_key = global.get('process_env').OPENAI_API\nconst api_key = msg.payload.key;\nconst content = msg.payload.text;\n\n// OpenAI API properties\nconst settings = {\n    model: \"text-davinci-003\",\n    prompt: content,\n    temperature: 0.7,\n    max_tokens: 64,\n    top_p: 1.0,\n    frequency_penalty: 0.0,\n    presence_penalty: 0.0\n};\n\nif (api_key) {\n    msg.url = 'https://api.openai.com/v1/completions';\n    msg.headers = {\n        'Content-Type': 'application/json',\n        'Authorization': `Bearer ${api_key}`,\n    };\n    msg.payload = settings;\n    msg.settings = settings;\n    return [msg, null];\n} else {\n    msg.payload = settings;\n    msg.settings = settings;\n    return [null, msg];\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 100,
+        "wires": [
+            [
+                "f5c2c1cf72ed75c3"
+            ],
+            [
+                "f8855aef0a28a260"
+            ]
+        ]
+    },
+    {
+        "id": "f5c2c1cf72ed75c3",
+        "type": "http request",
+        "z": "34f08c8e68659d11",
+        "name": "OpenAI API",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 630,
+        "y": 100,
+        "wires": [
+            [
+                "6a92649ba9e501c4"
+            ]
+        ]
+    },
+    {
+        "id": "6a92649ba9e501c4",
+        "type": "function",
+        "z": "34f08c8e68659d11",
+        "name": "Response",
+        "func": "function convertPayloadToObject(msg) {\n    let objArr = [];\n    for (const [key, value] of Object.entries(msg)) {\n        objArr.push({ key, value });\n    }\n    return objArr;\n}\nif (!msg.payload.error) {\n    msg.payload = {\n        succsess: true,\n        text: msg.payload.choices[0].text,\n        settings: convertPayloadToObject(msg.settings)\n    }\n} else {\n    msg.payload = {\n        succsess: false,\n        payload: msg.payload.error.code\n    }\n}\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 100,
+        "wires": [
+            [
+                "4f4e38cb261d09d0"
+            ]
+        ]
+    },
+    {
+        "id": "4f4e38cb261d09d0",
+        "type": "http response",
+        "z": "34f08c8e68659d11",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1010,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "f8855aef0a28a260",
+        "type": "function",
+        "z": "34f08c8e68659d11",
+        "name": "Response",
+        "func": "function convertPayloadToObject(msg) {\n    let objArr = [];\n    for (const [key, value] of Object.entries(msg)) {\n        objArr.push({ key, value });\n    }\n    return objArr;\n}\n\nmsg.payload = {\n    settings: convertPayloadToObject(msg.settings)\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 140,
+        "wires": [
+            [
+                "310e40aaa36de8f7"
+            ]
+        ]
+    },
+    {
+        "id": "310e40aaa36de8f7",
+        "type": "http response",
+        "z": "34f08c8e68659d11",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 780,
+        "y": 140,
+        "wires": []
+    }
+]
